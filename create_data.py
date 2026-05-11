@@ -5,6 +5,8 @@ from mimesis import Datetime, Numeric, Person
 from database import personal, db
 from app import app  # импортируем app для контекста
 
+
+
 dt = Datetime()
 num = Numeric()
 person = Person(Locale.RU)

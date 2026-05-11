@@ -1,0 +1,188 @@
+{% extends "layout.html" %}
+{% block body %}
+<script>
+  function toggleEmployee(btn) {
+    // Находим карточку сотрудника и список внутри неё
+    const card = btn.closest('.employee-card');
+    const list = card.querySelector('.emp-list');
+
+    if (list.classList.contains('hide')) {
+        list.classList.remove('hide');
+        list.classList.add('open');
+        btn.textContent = 'Свернуть';
+    } else {
+        list.classList.remove('open');
+        list.classList.add('hide');
+        btn.textContent = 'Развернуть';
+    }
+  }
+</script>
+
+<style>
+  .employees-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+      align-items: start;
+  }
+
+  .employee-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      background: #5CCCCC;
+      width: 100%;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+  }
+  .emp-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 12px 0;
+  }
+  /* Свёрнутый режим: показываем только Имя и Должность в одну строку */
+  .emp-list.hide {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+
+  }
+
+  .emp-list.hide .emp-field { display: none; }
+  .emp-list.hide .emp-field.name,
+  .emp-list.hide .emp-field.job {
+      display: flex;
+      flex: 1 ;
+      align-items: center;
+      background: #33CCCC;
+      padding: 8px 12px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      min-width: 0;
+       }
+  .emp-list.open { display: block; }
+  .emp-list.open .emp-field {
+      display: list-item;
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #eee;
+  }
+  .btn {
+      padding: 7px 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      background: #004080;
+  }
+  .btn-toggle { background: #003366; color: #fff; margin-right: 8px; }
+  .btn-toggle:hover { background: #5a6268; }
+  .btn-submit { background: #0d6efd; color: #fff; }
+  .btn-submit:hover { background: #0b5ed7; }
+
+</style>
+
+
+  <h2>Все сотрудники</h2>
+<!-- Сообщения -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+ <form method="GET" action="{{ url_for('sorted_employees') }}">
+  <!-- Общее поле -->
+  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
+    <label>
+      Сортировать по имени:
+      <button type="submit" name="field" value="name" style="margin-top: 10px;">
+        Сорировка
+      </button>    
+    </label>
+  </div>
+ </form>
+
+ <form method="GET" action="{{ url_for('sorted_employees') }}">
+  <!-- Общее поле -->
+  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
+    <label>
+      Сортировать по должность:
+      <button type="submit" name="field" value="job_title" style="margin-top: 10px;">
+        Сорировка
+      </button>    
+    </label>
+  </div>
+ </form>
+
+ <form method="GET" action="{{ url_for('sorted_employees') }}">
+  <!-- Общее поле -->
+  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
+    <label>
+      Сортировать по дате:
+      <button type="submit" name="field" value="date_of_employment" style="margin-top: 10px;">
+        Сорировка
+      </button>    
+    </label>
+  </div>
+ </form>
+
+ <form method="GET" action="{{ url_for('sorted_employees') }}">
+  <!-- Общее поле -->
+  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
+    <label>
+      Сортировать по ЗП:
+      <button type="submit" name="field" value="salary" style="margin-top: 10px;">
+        Сорировка
+      </button>    
+    </label>
+  </div>
+ </form>
+
+ <form method="GET" action="{{ url_for('sorted_employees') }}">
+  <!-- Общее поле -->
+  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
+    <label>
+      Сортировать по руководителю:
+      <button type="submit" name="field" value="manager_id" style="margin-top: 10px;">
+        Сорировка
+      </button>    
+    </label>
+  </div>
+ </form>
+
+
+ <form method="POST" action="{{ url_for('update_manager') }}">
+  <!-- Общее поле -->
+  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
+    <label>
+      Новый руководитель (ID):
+      <input type="text" name="new_manager_id" placeholder="Введите ID" style="width: 150px;">
+    </label>
+  </div>
+
+  <div class="employees-grid">
+  {%- for employee in employees %}
+    <div class="employee-card">
+    <ul id="data-list" class="emp-list hide">
+      <li class="emp-field"> Id в базе данных : {{employee.id}}</li>
+      <li class="emp-field name">  Имя: {{ employee.name}}</li>
+      <li class="emp-field job" > Должность: {{ employee.job_title}}</li>
+      <li class="emp-field"> Работает с: {{ employee.date_of_employment}}</li>
+      <li class="emp-field"> ЗП : {{ employee.salary}}</li>
+      <li class="emp-field"> Руководитель : {{ employee.manager_id}} — {{ employee.manager.name }}</li>
+    </ul>
+
+    <button type="button" class="btn btn-toggle" onclick="toggleEmployee(this)">Развернуть</button>
+      <button type="submit" class="btn btn-submit" name="employee_id" value="{{ employee.id }}" style="margin-top: 10px;">
+        Сменить руководителя
+      </button>    
+    </div>
+   {% endfor %}
+  </div>>
+  </form>
+  {% endblock %}    
+

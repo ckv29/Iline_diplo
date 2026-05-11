@@ -4,6 +4,8 @@ from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
 
+
+
 class personal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)

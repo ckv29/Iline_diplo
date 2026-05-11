@@ -20,6 +20,7 @@ source env/bin/activate
 Устанавливаем зависимости:
 pip install -r requirements.txt
 
+
 Запустить сервер ситстемы:
 python app.py
 

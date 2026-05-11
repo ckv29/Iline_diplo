@@ -47,7 +47,8 @@ def sorted_employees():
     columns = ['name','job_title','date_of_employment','salary','manager_id']
     if field not in columns:
         field = 'name'
-        
+
+
     order_col = getattr(personal,field)
 
     employees = personal.query.order_by(order_col).options(joinedload(personal.manager)).limit(10000).all()

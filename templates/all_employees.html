@@ -81,10 +81,144 @@
   .btn-submit { background: #0d6efd; color: #fff; }
   .btn-submit:hover { background: #0b5ed7; }
 
+    .sort-panel {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #a7c9b7;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 20px;
+      margin-top: 20px;
+  }
+  .sort-group { display: flex; align-items: center; gap: 8px; }
+  .sort-label { font-size: 14px; font-weight: 500; color: #000000; white-space: nowrap; }
+  .sort-select {
+      padding: 7px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #f8fafc;
+      font-size: 14px;
+      cursor: pointer;
+  }
+  .sort-select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
+  .btn-sort {
+      margin-left: auto;
+      padding: 7px 18px;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+  }
+  .btn-sort:hover { background: #2563eb; }
+  .pagination { display: flex; gap: 4px; list-style: none; padding: 0; }
+  .page-link { padding: 6px 12px; border: 1px solid #ccc; text-decoration: none; color: #333; border-radius: 4px; }
+  .page-link:hover { background: #f5f5f5; }
+  .active .page-link { background: #007bff; color: white; border-color: #007bff; }
+  .disabled .page-link { opacity: 0.5; cursor: default; }
+  }
+/* === Фильтры — каждый параметр в отдельной строке === */
+.filter-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #242B2C;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    padding : 10px;
+}
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+     background: #b1cccc;
+}
+.filter-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
+    white-space: nowrap;
+    min-width: 110px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+/* Иконки в лейблах */
+.filter-group label .icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* === Умная ширина инпутов === */
+.filter-group input,
+.filter-group select {
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    font-size: 14px;
+    min-width: 0;
+}
+
+/* Текстовые поля (имя, должность, руководитель) — широкие */
+.input-text {
+    flex: 1 1 250px;
+    max-width: 400px;
+}
+
+/* Числовые поля (зарплата) — средние */
+.input-number {
+    flex: 0 1 140px;
+    max-width: 160px;
+}
+
+/* Поля дат — узкие */
+.input-date {
+    flex: 0 1 150px;
+    max-width: 170px;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+}
+
+/* Кнопки действий */
+.filter-actions {
+    display: flex;
+    gap: 8px;
+
+    margin-top: 4px;
+     background: #b1cccc;
+}
+.filter-actions .btn {
+    padding: 7px 14px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.btn-apply { background: #0d6efd; color: #fff; }
+.btn-apply:hover { background: #0b5ed7; }
+.btn-reset { background: #6c757d; color: #fff; }
+.btn-reset:hover { background: #5c636a; }.btn-apply { background: #0d6efd; color: #fff; }
+.btn-apply:hover { background: #0b5ed7; }
+.btn-reset { background: #6c757d; color: #fff; }
+.btn-reset:hover { background: #5c636a; }
 </style>
 
 
-  <h2>Все сотрудники</h2>
+  <h2>Сотрудники</h2>
 <!-- Сообщения -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -94,70 +228,86 @@
     {% endif %}
   {% endwith %}
 
- <form method="GET" action="{{ url_for('sorted_employees') }}">
-  <!-- Общее поле -->
-  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
-    <label>
-      Сортировать по имени:
-      <button type="submit" name="field" value="name" style="margin-top: 10px;">
-        Сорировка
-      </button>    
-    </label>
+
+<!-- 🔍 Фильтры -->
+<form method="GET" action="{{ url_for('sorted_employees') }}" class="filter-panel">
+  <input type="hidden" name="page" value="1">
+  <input type="hidden" name="field" value="{{ field }}">
+  <input type="hidden" name="order" value="{{ order }}">
+
+  <div class="filter-group">
+    <label><span class="icon">🔍</span> Имя</label>
+    <input type="text" name="name" value="{{ filters.name }}" placeholder="Иванов" class="input-text">
   </div>
- </form>
 
- <form method="GET" action="{{ url_for('sorted_employees') }}">
-  <!-- Общее поле -->
-  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
-    <label>
-      Сортировать по должность:
-      <button type="submit" name="field" value="job_title" style="margin-top: 10px;">
-        Сорировка
-      </button>    
-    </label>
+  <div class="filter-group">
+    <label><span class="icon">🔍</span> Должность</label>
+    <input type="text" name="job_title" value="{{ filters.job_title }}" placeholder="Инженер" class="input-text">
   </div>
- </form>
 
- <form method="GET" action="{{ url_for('sorted_employees') }}">
-  <!-- Общее поле -->
-  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
-    <label>
-      Сортировать по дате:
-      <button type="submit" name="field" value="date_of_employment" style="margin-top: 10px;">
-        Сорировка
-      </button>    
-    </label>
+  <div class="filter-group">
+    <label><span class="icon">👤</span> Руководитель</label>
+    <input type="text" name="manager_name" value="{{ filters.manager_name }}" placeholder="Петров" class="input-text">
   </div>
- </form>
 
- <form method="GET" action="{{ url_for('sorted_employees') }}">
-  <!-- Общее поле -->
-  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
-    <label>
-      Сортировать по ЗП:
-      <button type="submit" name="field" value="salary" style="margin-top: 10px;">
-        Сорировка
-      </button>    
-    </label>
+  <div class="filter-group">
+    <label><span class="icon">💰</span> ЗП от</label>
+    <input type="number" name="salary_from" value="{{ filters.salary_from }}" step="0.01" class="input-number">
   </div>
- </form>
 
- <form method="GET" action="{{ url_for('sorted_employees') }}">
-  <!-- Общее поле -->
-  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
-    <label>
-      Сортировать по руководителю:
-      <button type="submit" name="field" value="manager_id" style="margin-top: 10px;">
-        Сорировка
-      </button>    
-    </label>
+  <div class="filter-group">
+    <label><span class="icon">💰</span> ЗП до</label>
+    <input type="number" name="salary_to" value="{{ filters.salary_to }}" step="0.01" class="input-number">
   </div>
- </form>
 
+  <div class="filter-group">
+    <label><span class="icon">📅</span> Дата от</label>
+    <input type="date" name="date_from" value="{{ filters.date_from }}" class="input-date">
+  </div>
 
- <form method="POST" action="{{ url_for('update_manager') }}">
+  <div class="filter-group">
+    <label><span class="icon">📅</span> Дата до</label>
+    <input type="date" name="date_to" value="{{ filters.date_to }}" class="input-date">
+  </div>
+
+  <div class="filter-actions">
+    <button type="submit" class="btn btn-apply">Применить</button>
+    <a href="{{ url_for('sorted_employees') }}" class="btn btn-reset">Сброс</a>
+  </div>
+</form>
+
+<form method="GET" action="{{ url_for('sorted_employees') }}" class="sort-panel">
+    <!-- 🔒 Сохраняем остальные GET-параметры (поиск, страница, фильтры) -->
+    {% for key, value in request.args.items() if key not in ['field', 'order'] %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}">
+    {% endfor %}
+
+    <div class="sort-group">
+        <label class="sort-label">Сортировать по:</label>
+           <select name="field" class="sort-select">
+            <option value="id" {% if request.args.get('field') == 'id' %}selected{% endif %}>ID</option>
+            <option value="name" {% if request.args.get('field') == 'name' %}selected{% endif %}>Имя</option>
+            <option value="job_title" {% if request.args.get('field') == 'job_title' %}selected{% endif %}>Должность</option>
+            <option value="salary" {% if request.args.get('field') == 'salary' %}selected{% endif %}>Зарплата</option>
+            <option value="date_of_employment" {% if request.args.get('field') == 'date_of_employment' %}selected{% endif %}>Дата найма</option>
+        </select>
+    </div>
+
+    <div class="sort-group">
+        <label class="sort-label">Порядок:</label>
+        <!-- Новый параметр. Если backend его игнорирует, он просто добавится в URL без вреда -->
+        <select name="order" class="sort-select">
+            <option value="asc" {% if request.args.get('order', 'asc') == 'asc' %}selected{% endif %}>↑ По возрастанию</option>
+            <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>↓ По убыванию</option>
+        </select>
+      <button type="submit" class="btn-sort">Применить</button>
+    </div>
+
+</form>
+
+ <form method="POST" action="{{ url_for('update_manager') }}" >
   <!-- Общее поле -->
-  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
+  <div class="sort-panel">
     <label>
       Новый руководитель (ID):
       <input type="text" name="new_manager_id" placeholder="Введите ID" style="width: 150px;">
@@ -184,5 +334,44 @@
    {% endfor %}
   </div>>
   </form>
+
+  {% if pagination.pages > 1 %}
+  <nav class="mt-4" aria-label="Навигация по страницам">
+    <ul class="pagination justify-content-center">
+
+      {% if pagination.has_prev %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('sorted_employees', page=pagination.prev_num, field=field, order=order, per_page=per_page, **filters) }}">« Назад</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">« Назад</span></li>
+      {% endif %}
+
+    {% for p in pagination.iter_pages(left_edge=2, left_current=1, right_current=2, right_edge=2) %}
+      {% if p %}
+        {% if p == pagination.page %}
+          <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('sorted_employees', page=p, field=field, order=order, per_page=per_page, **filters) }}">{{ p }}</a>
+          </li>
+        {% endif %}
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+    {% endfor %}
+
+    {# Кнопка "Вперёд" #}
+    {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('sorted_employees', page=pagination.next_num, field=field, order=order, per_page=per_page, **filters) }}">Вперёд »</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Вперёд »</span></li>
+    {% endif %}
+
+  </ul>
+  </nav>
+  {% endif %}
   {% endblock %}    
 

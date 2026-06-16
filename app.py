@@ -1,4 +1,3 @@
-"""Flask application for employee management."""
 
 import os
 from typing import cast
@@ -11,10 +10,10 @@ from sqlalchemy.orm import joinedload
 
 from database import db, personal
 
-# ─── Загрузка переменных окружения ─────────────────────────────────────
+# Загрузка переменных окружения
 load_dotenv()
 
-# ─── Константы (PEP 8: UPPER_CASE) ─────────────────────────────────────
+# Константы
 VALID_FIELDS = {"id", "name", "job_title", "date_of_employment", "salary", "manager_id"}
 VALID_ORDERS = {"asc", "desc"}
 DEFAULT_FIELD = "name"
@@ -23,7 +22,7 @@ DEFAULT_PER_PAGE = 40
 MIN_PER_PAGE = 1
 MAX_PER_PAGE = 100
 
-# ─── Настройки приложения ──────────────────────────────────────────────
+# Настройки приложения
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     print("⚠️  WARNING: SECRET_KEY not set in environment variables!")
@@ -35,7 +34,7 @@ DATABASE_URI = (
     f"{os.getenv('DB_NAME')}"
 )
 
-# ─── Инициализация Flask ───────────────────────────────────────────────
+# Инициализация Flask
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
@@ -43,7 +42,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 
-# ─── Движок для прямых запросов (опционально) ──────────────────────────
 engine = create_engine(DATABASE_URI, echo=False)
 
 
@@ -57,7 +55,7 @@ def test_connection() -> None:
         print(f"❌ DB connection error: {e}")
 
 
-# ─── Роуты ─────────────────────────────────────────────────────────────
+# Эндроинты
 @app.route("/")
 def index() -> str:
     """Главная страница — перенаправляет на список с дефолтной сортировкой."""
@@ -67,7 +65,7 @@ def index() -> str:
 @app.route("/sort_by/")
 def sorted_employees() -> str:
     """Список сотрудников с сортировкой, фильтрами и пагинацией."""
-    # 1️⃣ Параметры сортировки и пагинации
+    # Параметры сортировки и пагинации
     field = request.args.get("field", DEFAULT_FIELD)
     order = request.args.get("order", DEFAULT_ORDER).lower().strip()
     page = max(1, request.args.get("page", 1, type=int))
@@ -82,7 +80,7 @@ def sorted_employees() -> str:
     if order not in VALID_ORDERS:
         order = DEFAULT_ORDER
 
-    # 2️⃣ Параметры фильтров
+    # Параметры фильтров
     name = request.args.get("name", "").strip()
     job_title = request.args.get("job_title", "").strip()
     manager_name = request.args.get("manager_name", "").strip()
@@ -95,7 +93,7 @@ def sorted_employees() -> str:
     if salary_from is not None and salary_to is not None and salary_from > salary_to:
         salary_from, salary_to = salary_to, salary_from
 
-    # 3️⃣ Сборка запроса
+    #  Сборка запроса
     query = personal.query.options(joinedload(personal.manager))
 
     # Сортировка + стабильный вторичный ключ (id) для корректной пагинации
@@ -111,7 +109,6 @@ def sorted_employees() -> str:
     if job_title:
         query = query.filter(personal.job_title.ilike(f"%{job_title}%"))
     if manager_name:
-        # ✅ Исправлено: явная ссылка на колонку связанной модели
         query = query.filter(personal.manager.has(personal.name.ilike(f"%{manager_name}%")))
     if salary_from is not None:
         query = query.filter(personal.salary >= salary_from)
@@ -122,10 +119,10 @@ def sorted_employees() -> str:
     if date_to:
         query = query.filter(personal.date_of_employment <= date_to)
 
-    # 4️⃣ Пагинация
+    #  Пагинация
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
-    # 5️⃣ Контекст для шаблона
+    #  Контекст для шаблона
     filters = {
         k: v
         for k, v in {
@@ -212,5 +209,5 @@ def update_manager() -> str:
 
 # Старт
 if __name__ == "__main__":
-    test_connection()  # опционально: проверка при старте
+    test_connection()
     app.run(debug=True)
